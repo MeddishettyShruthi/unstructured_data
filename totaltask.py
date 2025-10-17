@@ -14,28 +14,24 @@ import matplotlib.pyplot as plt
 import random
 import spacy
 from spacy import displacy
-
-
 # Load spaCy model
 nlp = spacy.load("en_core_web_sm")
 
 st.set_page_config(page_title="🧠 Unstructured Data Analysis", layout="wide")
 st.title("🧠 Unstructured Data Analysis")
 
-tab1, tab2, tab3 = st.tabs(["🖼️ Image Analysis", "🎧 Audio Analysis", "📝 Text Analysis"])
+tab1, tab2, tab3 = st.tabs(["🖼 Image Analysis", "🎧 Audio Analysis", "📝 Text Analysis"])
 
 # ---------------------------- IMAGE ANALYSIS ---------------------------- #
 with tab1:
-    st.header("🖼️ Image Analysis with DeepFace & Background Removal")
+    st.header("🖼 Image Analysis with DeepFace & Background Removal")
 
     uploaded_image = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png"])
     if uploaded_image:
         img = Image.open(uploaded_image).convert("RGB")
         st.image(img, caption="Uploaded Image", width=300)
         img_array = np.array(img)
-
         col1, col2, col3, col4 = st.columns(4)
-
         with col1:
             if st.button("Detect Face"):
                 try:
@@ -50,8 +46,8 @@ with tab1:
                 try:
                     analysis = DeepFace.analyze(img_path=img_array, actions=['age', 'gender'], enforce_detection=True)
                     st.success("✅ Age & Gender detected!")
-                    st.write(f"**Predicted Age:** {analysis[0]['age']}")
-                    st.write(f"**Predicted Gender:** {analysis[0]['dominant_gender']}")
+                    st.write(f"Predicted Age: {analysis[0]['age']}")
+                    st.write(f"Predicted Gender: {analysis[0]['dominant_gender']}")
                 except Exception as e:
                     st.error(f"Age/Gender detection failed: {e}")
 
@@ -60,7 +56,7 @@ with tab1:
                 try:
                     analysis = DeepFace.analyze(img_path=img_array, actions=['emotion'], enforce_detection=True)
                     st.success("✅ Emotion detected!")
-                    st.write(f"**Predicted Emotion:** {analysis[0]['dominant_emotion']}")
+                    st.write(f"Predicted Emotion: {analysis[0]['dominant_emotion']}")
                 except Exception as e:
                     st.error(f"Emotion detection failed: {e}")
 
@@ -70,7 +66,7 @@ with tab1:
 
 # ---------------------------- AUDIO ANALYSIS ---------------------------- #
 with tab2:
-    st.header("🗣️ Text ↔ Speech")
+    st.header("🗣 Text ↔ Speech")
 
     # Text to Speech
     st.subheader("Text to Speech")
@@ -86,32 +82,7 @@ with tab2:
         else:
             st.warning("Please enter some text.")
 
-    # Speech to Text
-    st.subheader("Speech to Text")
-    uploaded_audio = st.file_uploader("Upload audio (wav, mp3, m4a):", type=["wav","mp3","m4a"])
-    if uploaded_audio:
-        audio_bytes = uploaded_audio.read()
-        audio = AudioSegment.from_file(io.BytesIO(audio_bytes))
-        wav_io = io.BytesIO()
-        audio.export(wav_io, format="wav")
-        wav_io.seek(0)
-        st.audio(wav_io, format="audio/wav")
-
-        if st.button("Transcribe Audio"):
-            recognizer = sr.Recognizer()
-            wav_io.seek(0)
-            with sr.AudioFile(wav_io) as source:
-                audio_data = recognizer.record(source)
-            with st.spinner("Transcribing..."):
-                try:
-                    transcription = recognizer.recognize_google(audio_data)
-                    st.success("✅ Transcription complete!")
-                    st.subheader("Transcribed Text")
-                    st.write(transcription)
-                except sr.UnknownValueError:
-                    st.error("Speech not recognized.")
-                except sr.RequestError:
-                    st.error("Google API unavailable or network error.")
+    
 
 # ---------------------------- TEXT ANALYSIS ---------------------------- #
 with tab3:
@@ -207,27 +178,26 @@ with tab3:
             st.warning("Please paste or select some text first.")
 
 
-    nlp = spacy.load("en_core_web_sm")
+        nlp = spacy.load("en_core_web_sm")
 
-    # Use the current text from your text area
-    text = st.session_state.get('text_area', '')
+        # Use the current text from your text area
+        text = st.session_state.get('text_area', '')
 
-    if text.strip():
-        doc = nlp(text)
+        if text.strip():
+            doc = nlp(text)
 
-        # Display entities with colors using displaCy HTML
-        html = displacy.render(doc, style="ent", jupyter=False)
-        st.write("**Detected Entities:**", unsafe_allow_html=True)
-        st.markdown(html, unsafe_allow_html=True)
+            # Display entities with colors using displaCy HTML
+            html = displacy.render(doc, style="ent", jupyter=False)
+            st.write("Detected Entities:", unsafe_allow_html=True)
+            st.markdown(html, unsafe_allow_html=True)
 
-        # Optional: show entity table
-        entities = [(ent.text, ent.label_) for ent in doc.ents]
-        if entities:
-            st.markdown("**Entity Table:**")
-            st.table(entities)
+            # Optional: show entity table
+            entities = [(ent.text, ent.label_) for ent in doc.ents]
+            if entities:
+                st.markdown("Entity Table:")
+                st.table(entities)
+            else:
+                st.info("No named entities found.")
+
         else:
-            st.info("No named entities found.")
-
-    else:
-        st.info("Paste or select some text to see NER results.")
-
+            st.info("Paste or select some text to see NER results.")
